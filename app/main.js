@@ -19,11 +19,16 @@ const server = net.createServer((connection) => {
         // Now read the correlation_id as a 32-bit unsigned integer
         const correlationID = correlationBuffer.readUInt32BE(0);
 
-        // Create an response
+
         const messageSize = 4;
-        const response = Buffer.alloc(8);
+        const response = Buffer.alloc(12);
+
+        // We need to send ApiVersions v4 response with the errorCode 35
+        const errorCode = 35;
+
         response.writeInt32BE(messageSize, 0);
         response.writeInt32BE(correlationID, 4);
+        response.writeInt16BE(errorCode, 8);
         connection.write(response);
     })
 });

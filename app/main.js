@@ -77,10 +77,10 @@ const server = net.createServer((connection) => {
         }
 
 
-        const responseBuffer = Buffer.alloc(28);
+        const responseBuffer = Buffer.alloc(29);
 
         // Set message size
-        responseBuffer.writeUInt32BE(25, 0);
+        responseBuffer.writeUInt32BE(19, 0);
 
         // Set correlation ID (same as request)
         responseBuffer.writeUInt32BE(correlationID, 4);
@@ -89,17 +89,18 @@ const server = net.createServer((connection) => {
         responseBuffer.writeUInt16BE(0, 8);
 
         // Set API Keys array size
-        responseBuffer.writeUInt32BE(1, 10); // 4-byte size indicating 1 API key
+        responseBuffer.writeUInt8(2, 10); // 1-byte size indicating 1 API key
 
         // Add an API key entry (API key 18 - ApiVersions)
-        responseBuffer.writeUInt16BE(18, 14); // API key (16-bit)
-        responseBuffer.writeUInt16BE(0, 16);  // Min version (16-bit)
-        responseBuffer.writeUInt16BE(4, 18);  // Max version (16-bit)
+        responseBuffer.writeUInt16BE(18, 11); // API key (16-bit)
+        responseBuffer.writeUInt16BE(0, 13);  // Min version (16-bit)
+        responseBuffer.writeUInt16BE(4, 15);  // Max version (16-bit)
+        responseBuffer.writeUInt8(0, 17);  // tagged fields (8-bit)
+
 
         // Add throttle_time_ms (required for ApiVersions v3)
-        responseBuffer.writeUInt32BE(0, 20);
-
-        responseBuffer.writeUInt8(0, 24);
+        responseBuffer.writeUInt32BE(0, 18);
+        responseBuffer.writeUInt8(0, 22);  // tagged fields (8-bit)
 
         // Send response
         connection.write(responseBuffer);

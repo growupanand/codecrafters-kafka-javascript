@@ -47,21 +47,34 @@ const server = net.createServer((connection) => {
 
         const apiKey = data.readUInt16BE(4);
 
-        const correlationBuffer = data.subarray(8, 12);
-        const correlationID = correlationBuffer.readUInt32BE(0);
+        const apiVersion = data.readUInt16BE(6);
+        const correlationID = data.readUInt32BE(8);
 
-        console.log({ apiKey, correlationID })
+        console.log({ apiKey, correlationID, apiVersion })
+
 
         /**
-         * Response ArrayBuffer structure:
-         * 
-         * 00 00 00 12  // message_size:        18              (4 bytes long)
-         * 6f 7f c6 61  // correlation_id:      1870644833      (4 bytes long)
-         * 00 00        // error_code:          0               (2 bytes long)
-         * API Keys array section
-         * 
-         * 00 00 00 00  // API Keys array size: 0                 (4 bytes long)
-         */
+ * Response ArrayBuffer structure:
+ * 
+ * 00 00 00 12  // message_size:        18              (4 bytes long)
+ * 6f 7f c6 61  // correlation_id:      1870644833      (4 bytes long)
+ * 00 00        // error_code:          0               (2 bytes long)
+ * API Keys array section
+ * 
+ * 00 00 00 00  // API Keys array size: 0                 (4 bytes long)
+ */
+
+
+        if (apiVersion > 4) {
+            const errorCode = 34;
+
+            const responseBuffer = Buffer.alloc(10);
+            responseBuffer.writeUInt32BE(8, 0);
+            responseBuffer.writeUInt32BE(correlationID, 4);
+            responseBuffer.writeUInt16BE(errorCode, 8);
+            connection.write(responseBuffer);
+            return;
+        }
 
 
         const responseBuffer = Buffer.alloc(28);

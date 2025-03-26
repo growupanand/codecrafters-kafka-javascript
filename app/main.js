@@ -66,7 +66,7 @@ const server = net.createServer((connection) => {
 
 
         if (apiVersion > 4) {
-            const errorCode = 34;
+            const errorCode = 35;
 
             const responseBuffer = Buffer.alloc(10);
             responseBuffer.writeUInt32BE(8, 0);
@@ -83,7 +83,7 @@ const server = net.createServer((connection) => {
         responseBuffer.writeUInt32BE(25, 0);
 
         // Set correlation ID (same as request)
-        correlationBuffer.copy(responseBuffer, 4);
+        responseBuffer.writeUInt32BE(correlationID, 4);
 
         // Set error code
         responseBuffer.writeUInt16BE(0, 8);
